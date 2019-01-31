@@ -46,7 +46,7 @@ tcp_connection::tcp_connection(boost::asio::io_service& io_service) :
 
 void tcp_connection::handle_write(const boost::system::error_code& error)
 {
-
+    // method stub
 }
 
 void tcp_connection::send_nak(void)
@@ -125,7 +125,7 @@ void tcp_connection::handle_read(const boost::system::error_code& error)
         frame.pop_back();
 
         std::string command = frame.substr(0, 5);
-        std::string body =  frame.substr(5, frame.length() - 5);
+        std::string body = frame.substr(5, frame.length() - 5);
 
         if (command.compare("POST+") == 0)
         {
@@ -144,7 +144,7 @@ void tcp_connection::handle_read(const boost::system::error_code& error)
 
             this->start();
         }
-        else if(command.compare("QUIT+") == 0)
+        else if (command.compare("QUIT+") == 0)
         {
             std::cout << "[client " << "\"" << this->_name << "\" has quit] " << std::endl;
             this->_socket.close();

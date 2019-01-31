@@ -42,7 +42,6 @@ void tcp_server::handle_accept(tcp_connection::pointer new_connection, const boo
     start_accept();
 }
 
-
 void tcp_server::broadcast(std::string str)
 {
     for (tcp_connection::pointer &con : this->_connections)
@@ -50,28 +49,4 @@ void tcp_server::broadcast(std::string str)
         con->send(str);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
