@@ -105,54 +105,52 @@ void tcp_connection::handle_handshake(const boost::system::error_code& error)
 
 void tcp_connection::handle_read(const boost::system::error_code& error)
 {
-    if (!error)
-    {
-        //std::cout << "[new message received]" << std::endl;
-
-        std::string frame = boost::asio::buffer_cast<const char*>(_message.data());
-
-        auto size = _message.size();
-        _message.consume(size);
-
-        frame = frame.substr(0, size);
-
-        if (frame.length() < 7)
-        {
-            send_nak();
-            return;
-        }
-
-        frame.pop_back();
-
-        std::string command = frame.substr(0, 5);
-        std::string body = frame.substr(5, frame.length() - 5);
-
-        if (command.compare("POST+") == 0)
-        {
-            Message *p_msg = new Message(std::chrono::system_clock::now(), body);
-            Message::messages_.push_back(std::unique_ptr<Message>(p_msg));
-
-            std::stringstream msg_ss;
-
-            msg_ss << "["
-                    << std::chrono::duration_cast<std::chrono::seconds>(p_msg->get_time().time_since_epoch()).count()
-                    << "] " << this->_name << " : " << p_msg->get_body();
-
-            std::cout << msg_ss.str() << std::endl;
-
-            _server->broadcast(msg_ss.str());
-
-            this->start();
-        }
-        else if (command.compare("QUIT+") == 0)
-        {
-            std::cout << "[client " << "\"" << this->_name << "\" has quit] " << std::endl;
-            this->_socket.close();
-        }
-    }
-    else
+    if (error)
     {
         std::cout << "[an error occurred] " << std::endl;
+        return;
+    }
+
+    //std::cout << "[new message received]" << std::endl;
+
+    std::string frame = boost::asio::buffer_cast<const char*>(_message.data());
+
+    auto size = _message.size();
+    _message.consume(size);
+
+    frame = frame.substr(0, size);
+
+    if (frame.length() < 7)
+    {
+        send_nak();
+        return;
+    }
+
+    frame.pop_back();
+
+    std::string command = frame.substr(0, 5);
+    std::string body = frame.substr(5, frame.length() - 5);
+
+    if (command.compare("POST+") == 0)
+    {
+        Message *p_msg = new Message(std::chrono::system_clock::now(), body);
+        Message::messages_.push_back(std::unique_ptr<Message>(p_msg));
+
+        std::stringstream msg_ss;
+
+        msg_ss << "[" << std::chrono::duration_cast<std::chrono::seconds>(p_msg->get_time().time_since_epoch()).count()
+                << "] " << this->_name << " : " << p_msg->get_body();
+
+        std::cout << msg_ss.str() << std::endl;
+
+        _server->broadcast(msg_ss.str());
+
+        this->start();
+    }
+    else if (command.compare("QUIT+") == 0)
+    {
+        std::cout << "[client " << "\"" << this->_name << "\" has quit] " << std::endl;
+        this->_socket.close();
     }
 }
 
